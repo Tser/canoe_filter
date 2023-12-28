@@ -148,7 +148,7 @@ class GUI:
     def on_id_focus_out(self, event):
         if self.ECU_filter_id.get() == '':
             self.ECU_filter_id.set('0x00')
-        elif not self.ECU_filter_id.get().startswith('0x') or not self.ECU_filter_id.get().startswith('0X'):
+        elif not self.ECU_filter_id.get().lower().startswith('0x'):
             self.ECU_filter_id.set('0x' + self.ECU_filter_id.get())
         else:
             pass
