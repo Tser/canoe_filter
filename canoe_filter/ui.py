@@ -11,6 +11,7 @@
 import re
 import threading
 import tkinter as tk
+from tkinter import messagebox
 from tkinter.ttk import Separator
 from tkinter import filedialog, ttk
 from py_canoe import CANoe, wait
@@ -132,7 +133,6 @@ class GUI:
         tk.Label(row_7, textvariable=self.status_text, bg='yellow', fg='red', font=12).pack(side='left')
         row_7.pack()
 
-
     def on_entry_focus_in(self, event):
         if self.file_path.get() == '输入CANoe配置文件':
             self.file_path.set('')
@@ -153,7 +153,6 @@ class GUI:
         else:
             pass
 
-
     def on_data_focus_in(self, event):
         if self.ECU_filter_data.get() == '00 00 00 00 00 00 00 00':
             self.ECU_filter_data.set('')
@@ -163,13 +162,19 @@ class GUI:
             self.ECU_filter_data.set('00 00 00 00 00 00 00 00')
         else:
             # 使用正则验证数据是否满足标准格式：xx xx xx xx xx xx xx xx ，其中xx为十六进制数, 没有空格的自动添加上空格
-            patten = re.compile(r'^[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}\s+[0-9a-fA-F]{2}$')
-            if patten.match(self.ECU_filter_data.get()):
-                pass
-            else:
-                self.ECU_filter_data.set('00 00 00 00 00 00 00 00')
-
-
+            source = self.ECU_filter_data.get().strip().upper().replace(' ', '')
+            # 判断是否为偶数
+            if len(source) % 2: source += '0'
+            # 使用正则获取合法数据
+            try:
+                result = re.match(re.compile(r'[\dA-F]+'), source).group()
+                if result == source:
+                    self.ECU_filter_data.set(' '.join([result[i:i+2] for i in range(0, len(result), 2)]))
+                else:
+                    if messagebox.askyesno('错误:', '数据格式不正确，是否重置数据？'):
+                        self.ECU_filter_data.set('00 00 00 00 00 00 00 00')
+            except AttributeError:
+                self.ECU_filter_data.set('')
 
     def open_file(self):
         file_path = filedialog.askopenfilename(
