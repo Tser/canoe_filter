@@ -39,7 +39,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'canoe_filter = canoe_filter.ui:main'
+            'canoe_filter = canoe_filter.canoe_filter_ui:main'
         ]
     },
     data_files=[

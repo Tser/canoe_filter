@@ -55,7 +55,7 @@ class GUI:
         row_0.pack()
 
         row_1 = tk.Frame(self.root, height=20)
-        self.file_path_entry = tk.Entry(row_1, width=50, textvariable=self.file_path)
+        self.file_path_entry = tk.Entry(row_1, width=50, textvariable=self.file_path, fg='grey')
         self.file_path_entry.grid(row=0, column=0)
         tk.Label(row_1, width=2).grid(row=0, column=1)
         self.button = tk.Button(row_1, text='. . .', command=self.open_file, width=5)
@@ -92,7 +92,7 @@ class GUI:
         ttk.Combobox(row_4, values=(1, 2), width=3, textvariable=self.channel).grid(row=0, column=1)
         tk.Label(row_4, width=2).grid(row=0, column=2)
         tk.Label(row_4, text='I D:').grid(row=0, column=3)
-        self.ecu_id_entry = tk.Entry(row_4, width=6, textvariable=self.ECU_filter_id)
+        self.ecu_id_entry = tk.Entry(row_4, width=6, textvariable=self.ECU_filter_id, fg='grey')
         self.ecu_id_entry.grid(row=0, column=4)
         # 监控输入框内焦点，当输入框获得焦点时会触发事件
         self.ecu_id_entry.bind('<FocusIn>', self.on_id_focus_in)
@@ -101,7 +101,7 @@ class GUI:
 
         tk.Label(row_4, width=2).grid(row=0, column=5)
         tk.Label(row_4, text='信 息:').grid(row=0, column=6)
-        self.ecu_data_entry = tk.Entry(row_4, width=25, textvariable=self.ECU_filter_data)
+        self.ecu_data_entry = tk.Entry(row_4, width=25, textvariable=self.ECU_filter_data, fg='grey')
         self.ecu_data_entry.grid(row=0, column=7)
         # 监控输入框内焦点，当输入框获得焦点时会触发事件
         self.ecu_data_entry.bind('<FocusIn>', self.on_data_focus_in)
@@ -136,17 +136,21 @@ class GUI:
     def on_entry_focus_in(self, event):
         if self.file_path.get() == '输入CANoe配置文件':
             self.file_path.set('')
+            self.file_path_entry.configure(fg='black')
 
     def on_entry_focus_out(self, event):
         if self.file_path.get() == '':
+            self.file_path_entry.configure(fg='grey')
             self.file_path.set('输入CANoe配置文件')
 
     def on_id_focus_in(self, event):
         if self.ECU_filter_id.get() == '0x00':
             self.ECU_filter_id.set('')
+            self.ecu_id_entry.configure(fg='black')
 
     def on_id_focus_out(self, event):
         if self.ECU_filter_id.get() == '':
+            self.ecu_id_entry.configure(fg='grey')
             self.ECU_filter_id.set('0x00')
         elif not self.ECU_filter_id.get().lower().startswith('0x'):
             self.ECU_filter_id.set('0x' + self.ECU_filter_id.get())
@@ -156,9 +160,11 @@ class GUI:
     def on_data_focus_in(self, event):
         if self.ECU_filter_data.get() == '00 00 00 00 00 00 00 00':
             self.ECU_filter_data.set('')
+            self.ecu_data_entry.configure(fg='black')
 
     def on_data_focus_out(self, event):
         if self.ECU_filter_data.get() == '':
+            self.ecu_data_entry.configure(fg='grey')
             self.ECU_filter_data.set('00 00 00 00 00 00 00 00')
         else:
             # 使用正则验证数据是否满足标准格式：xx xx xx xx xx xx xx xx ，其中xx为十六进制数, 没有空格的自动添加上空格
@@ -182,7 +188,12 @@ class GUI:
             title='选择CANoe配置文件',
             initialdir='~/Desktop',
         )
-        self.file_path.set(file_path)
+        if file_path == '':
+            self.file_path_entry.configure(fg='grey')
+            self.file_path.set('输入CANoe配置文件')
+        else:
+            self.file_path_entry.configure(fg='black')
+            self.file_path.set(file_path)
 
     def start_filtering(self):
         # 通过py_canoe启动CANoe并实时获取CAN信号
@@ -215,28 +226,24 @@ class GUI:
                 self.root.protocol('WM_DELETE_WINDOW', self.window_close)
 
                 if self.status.get() == 'start':
+                    self.index += 1
                     # canoe.start_measurement()
                     # canoe_data = canoe.get_can_bus_statistics(1)
                     # 将实时数据添加到表格中,编号自动累计
-                    self.index += 1
+
                     self.tree.insert('', 'end', text=str(self.index), values=('2023-01-01 00:00:00', '1', '1', '10 02 00 00 00 00 00 00'))
 
                     wait(1)  # 实际场景去掉
 
                 elif self.status.get() == 'suspend':
-                    wait(0.5)
+                    pass  # wait(0.1)
                 elif self.status.get() == 'stop':
                     break
                 else:
                     pass
 
         # canoe.stop_measurement()
-
-    def stop_thread(self):
-        pass
-
-    def suspend_thread(self):
-        pass
+        # canoe.quit()
 
     def window_close(self):
         self.root.destroy()
